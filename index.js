@@ -117,7 +117,6 @@ function init() {
     projectiles = []
     enemies = []
     particles = []
-    score = 0
     pointsEl.innerHTML = score
     bigScoreEl.innerHTML = score
 }
@@ -215,14 +214,34 @@ function animate() {
     })
 }
 
-window.addEventListener('click', (event) => {
-    const angle = Math.atan2(event.clientY - canvas.height / 2, event.clientX - canvas.width / 2)
-    const velocity = {
-        x: 3* Math.cos(angle),
-        y: 3* Math.sin(angle)
-    }
-    projectiles.push(new Projectile(canvas.width/2, canvas.height/2, 5, 'gold', velocity))
-})
+let shootingInterval;
+
+window.addEventListener('mousedown', (event) => {
+    window.addEventListener('mousemove', updateMousePosition);
+
+    shootingInterval = setInterval(() => {
+        const angle = shootingAngle; // Use the updated shootingAngle
+        const velocity = {
+            x: 3 * Math.cos(angle),
+            y: 3 * Math.sin(angle)
+        };
+        projectiles.push(new Projectile(canvas.width / 2, canvas.height / 2, 5, 'gold', velocity));
+    }, 500); // 100 milliseconds interval
+});
+
+window.addEventListener('mouseup', () => {
+    clearInterval(shootingInterval);
+    window.removeEventListener('mousemove', updateMousePosition);
+});
+
+let shootingAngle = 0; // Initialize shootingAngle
+
+function updateMousePosition(event) {
+    // Update the mouse position for calculating the angle in the setInterval
+    event.clientX = event.clientX || event.touches[0].clientX; // For touch events
+    event.clientY = event.clientY || event.touches[0].clientY; // For touch events
+    shootingAngle = Math.atan2(event.clientY - canvas.height / 2, event.clientX - canvas.width / 2);
+}
 
 startButton.addEventListener('click', () => {
     init()
